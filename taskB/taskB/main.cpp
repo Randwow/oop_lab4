@@ -7,72 +7,79 @@
 #include <iostream>
 #include <string>
 using namespace std;
-class Room{
-    int width{0},height{0};
-    
-    public:
-    
-    Room(){}
-    ~Room(){}
-
-    int getArea()const{return width*height;}
-    
-    int getWidth()const{return width;}
-
-    int getHeight()const{return height;}
-
-    void setWidth(int Width){width = Width;}
-
-    void setHeight(int Height){height = Height;}
-
+    class Room{;
+        public:
+        Room(int area):m_nArea(area){}
+        
+        Room(const Room& room){
+            m_nArea = room.GetArea();
+        }
+        
+        ~Room(){}
+        
+        int GetArea()const{return m_nArea;}
+        
+    protected:
+    int m_nArea;
+};
+    class LivingRoom : public Room {
+        public:
+        LivingRoom(int area):Room(area){}
+        ~LivingRoom(){}
 };
  
-class oneRoomApartment{ // класс однокомнатной квартиры
-    
-    int floor,kitchen_area;
+    class Kitchen : public Room {
+        public:
+            Kitchen(int area):Room(area){}
+            ~Kitchen(){}
+};
+    class oneRoomApartment{
     
     public :
     
-    void setFloor(int Floor){floor = Floor;}
-    
-    int getFloor()const{return floor;}
-    
-    int getKitchen_area()const{ return kitchen_area;}
-    
-    void setKitchen_area(int Kitchen_area){kitchen_area = Kitchen_area;}
-    
-    oneRoomApartment(){}
-    ~oneRoomApartment(){}
-    
+    oneRoomApartment(int floor, Kitchen kitchen_area, LivingRoom living_area):m_nFloor(floor){
+        NewKitchen = new Kitchen(kitchen_area);
+        NewLiving = new LivingRoom(living_area);
+    };
+        
+    ~oneRoomApartment(){
+        delete NewLiving;
+        delete NewKitchen;
+    }
+        
+        friend ostream& operator<<(ostream& os,const oneRoomApartment& apartament) //перегрузка оператора '<<'
+        {
+          return os << "floor: " << apartament.m_nFloor << endl
+                    << "kitchen square: " << apartament.NewKitchen->GetArea() << endl
+                    << "livingRoom square: " << apartament.NewLiving->GetArea() << endl;
+        }
+        int m_nFloor;
+        Kitchen *NewKitchen;
+        LivingRoom *NewLiving;
   };
-class oneRoomApartment_withAdress : public oneRoomApartment, public Room{
-    char * adress;
+class oneRoomApartment_withAdress : public oneRoomApartment{
+    string m_nAdress;
     
     public:
+    oneRoomApartment_withAdress(string adress, int floor, Kitchen kitchen_area,LivingRoom living_area ):oneRoomApartment(floor, kitchen_area, living_area),m_nAdress(adress){}
     
-    oneRoomApartment_withAdress(){}
     ~oneRoomApartment_withAdress(){}
     
-    void setAdress(char * Adress){this->adress = Adress;}
+     string GetAdress()const {return m_nAdress;}
     
-     char *getAdress()const {return adress;}
   friend ostream& operator<<(ostream& os,const oneRoomApartment_withAdress& apartament)
   {
-      return os << "floor: " << apartament.getFloor() << endl
-      << "kitchen square: " << apartament.getKitchen_area() << endl
-      << "livingRoom square: " << apartament.getArea() << endl
-      << "adress: " << apartament.getAdress() << endl;
+      return os << "adress: " << apartament.GetAdress() << endl
+                   << "livingRoom area: " << apartament.NewLiving->GetArea() << endl
+                   << "kitchenRoom area: " << apartament.NewKitchen->GetArea() << endl
+                   << "floor: " << apartament.m_nFloor << endl;
   }
-
 };
 
 int main(){
-    oneRoomApartment_withAdress oneRoom;
-    oneRoom.setFloor(5);
-    oneRoom.setKitchen_area(24);
-    oneRoom.setAdress("Becker street");
-    oneRoom.setHeight(6);
-    oneRoom.setWidth(8);
+    oneRoomApartment oneRoom(5,(Kitchen)20, (LivingRoom)45);
+    oneRoomApartment_withAdress oneRoom_w_adress("Beker street 221b :)",2, (Kitchen)25, (LivingRoom)50);
     cout << oneRoom;
+    cout << oneRoom_w_adress;
   return 0;
 }
